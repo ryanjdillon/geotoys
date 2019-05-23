@@ -8,6 +8,7 @@ install_requires = [
     "numpy>=1.16.2",
     "matplotlib>=3.0.3",
     "pandas>=0.24.2",
+    "pyproj>=2.1.2",
     "rasterio>=1.0.22",
     "requests>=2.21.0",
     "sentinelsat>=0.13",
