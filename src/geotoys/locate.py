@@ -17,7 +17,7 @@ def find_places(query):
             if len(postal_code) == 4:
                 print(postal_code, parts[i+1])
                 # Check 
-                #response = get_osm_location(postal_code, name)
+                #response = get_osm_location("{postal_code} {name}")
                 #lon = response['lon']
                 #lat = response['lat']
                 #poly = 
@@ -30,11 +30,11 @@ def get_osm_location(query):
     """
     import requests
 
-    url = f"https://nominatim.openstreetmap.org/search/{postal_code}%20{name}?format=json"
+    url = f"https://nominatim.openstreetmap.org/search/{query}?format=json"
 
     try:
         response = requests.get(url, params={'polygon':'1'})
     except Exception as e:
         raise e
 
-    return response
+    return response.json()
