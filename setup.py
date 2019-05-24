@@ -1,4 +1,15 @@
+import codecs
+import re
+import os.path
 from setuptools import setup, find_packages
+
+def fpath(name):
+    return os.path.join(os.path.dirname(__file__), name)
+
+
+def read(fp):
+    return codecs.open(fpath(fp), encoding="utf-8").read()
+
 
 install_requires = [
     "Cartopy>=0.17.0",
@@ -16,17 +27,24 @@ install_requires = [
     "Shapely>=1.6.4",
 ]
 
+with open("README.md", "r") as f:
+    long_description = f.read()
+
+version = {}
+with open(os.path.join("src", "geotoys", "version.py"), "r") as f:
+    exec(f.read(), version)
 
 setup(
     name="geotoys",
     packages=find_packages(where="src"),
     package_dir={"": "src"},
-    version="0.0.0",
+    version=version["__version__"],
     url="https://github.com/ryanjdillon/geotoys",
     license="MIT",
-    author="Ryan J. Dillon",
-    author_email="ryanjamesdillon.gmail.com",
+    maintainer="Ryan J. Dillon",
     description="Tools for working with geospatial data in python",
+    long_description=long_description,
+    long_description_type="text/markdown",
     install_requires=install_requires,
     test_suite="tests",
 )
