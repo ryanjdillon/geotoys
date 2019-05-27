@@ -37,7 +37,7 @@ def stack_bands(bands):
     return bands
 
 
-def save_jpeg_rgb(bands, src_profile, fp_dst, band_count=3):
+def save_jpeg_rgb(bands, src_profile, fp_dst, band_count=3, write_xml=False):
     """
     Save image data as JPEG RGB formatted image
 
@@ -54,13 +54,18 @@ def save_jpeg_rgb(bands, src_profile, fp_dst, band_count=3):
     jpg_profile = {
         "driver": "JPEG",
         "dtype": "uint8",
-        "nodata": src_profile["nodata"],
         "width": src_profile["width"],
         "height": src_profile["height"],
         "count": band_count,
-        "crs": src_profile["crs"],
-        "transform": src_profile["transform"],
         }
+
+    if write_xml:
+        jpg_profile.update({
+            "nodata": src_profile["nodata"],
+            "crs": src_profile["crs"],
+            "transform": src_profile["transform"],
+        })
+
 
     # Write normalized RGB data to jpeg
     with rasterio.open(fp_dst, "w", **jpg_profile) as dst:
