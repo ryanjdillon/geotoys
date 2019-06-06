@@ -80,16 +80,23 @@ def quickplot(fp, band, crs=None, coast_res="50m"):
     plt.show()
 
 
-def get_plottables(src):
+def get_plottables(src, bands=None):
     """
     Get georeferenced image information for plotting using imshow
     """
     import cartopy.crs as ccrs
+    import numpy
 
     x0,y0 = src.profile['transform']*(0,0)
     x1,y1 = src.profile['transform']*(src.profile['width'], src.profile['height'])
     extent = (x0, x1, y0, y1)
-    data = src.read(1)
+
+    if not bands:
+        bands = [1,]
+
+    data = numpy.array([src.read(i) for i in bands])
+    # TODO automate this
+    data = numpy.moveaxis(data, 0, -1)
 
     # Query online for CRS
     transform = src.profile['crs'].to_epsg()
@@ -101,10 +108,12 @@ def get_plottables(src):
     return data, transform, extent
 
 
-def add_location(ax, name, lon, lat, text_color=None):
+def add_location(ax, name, lon, lat, crs, text_color=None):
     """
     Add a geodesic location to the plot axis
     """
+    import matplotlib.patheffects as pe
+
     xy_point = xy_text = (lon, lat)
     ax.plot(*xy_point, marker='o', markersize=8, color='white')
 
@@ -130,11 +139,8 @@ def lonlatlines(ax, crs, lats=None, lons=None, alpha=0.5):
     ==========
     https://scitools.org.uk/cartopy/docs/v0.13/matplotlib/gridliner.html
     """
-    import matplotlib.ticker
-    #import cartopy.crs as ccrs
-
     from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
-
+    import matplotlib.ticker
 
     gl = ax.gridlines(crs=crs, draw_labels=True,
                       linewidth=1.5, color='#e1e5ed', alpha=0.5, linestyle=':')
@@ -156,13 +162,14 @@ def lonlatlines(ax, crs, lats=None, lons=None, alpha=0.5):
     return ax
 
 
+# TODO automate data dimensions somehow, log it
 def plot_src(data, crs, extent, locations=[], text_color=None, cbar_title='', **kwargs):
     """
     Plot rasterio image with optional locations
 
     Parameters
     ==========
-    data: ndarray (3,n,n)
+    data: ndarray (n,n,3)
         Data for the 3 bands to be plotted as RGB
     crs: cartopy.CRS
         Coordinate reference system of data
@@ -178,9 +185,7 @@ def plot_src(data, crs, extent, locations=[], text_color=None, cbar_title='', **
     **kwargs: dict
         Matplotlib.pyplot.imshow kwargs
     """
-    import cartopy.crs as ccrs
     import matplotlib.pyplot as plt
-    import matplotlib.patheffects as pe
 
     fig, ax = plt.subplots(subplot_kw={'projection':crs})
     img = ax.imshow(data, transform=crs, extent=extent, origin="upper", **kwargs)
@@ -188,7 +193,7 @@ def plot_src(data, crs, extent, locations=[], text_color=None, cbar_title='', **
 
     if any(locations):
         for name, lon, lat in locations:
-            add_location(ax, name, lon, lat, text_color=text_color)
+            add_location(ax, name, lon, lat, crs, text_color=text_color)
 
     cbar = fig.colorbar(img, shrink=0.7, orientation='vertical')
     cbar.ax.set_title(cbar_title)
