@@ -12,7 +12,9 @@ def read(fp):
 
 
 install_requires = [
-    "Cartopy>=0.17.0",
+    # NOTE, workaround for the PEP517 error until Cartopy >0.17.0 is released
+    # https://github.com/SciTools/cartopy/issues/1270#issuecomment-458933013
+    "Cartopy==0.16.0",
     "descartes>=1.1.0",
     "geopandas>=0.4.1",
     "netCDF4==1.5.0.1",
